@@ -5,6 +5,7 @@ import {
     documentBorder,
     documentInvert,
     enabledClass,
+    invertPreserveClass,
     replacements,
     themeClasses,
     updateLink,
@@ -368,8 +369,21 @@ class DocsAfterDark {
     private updateDocumentInvert() {
         const invertOptions: InvertOptions = this.extensionData.invert;
 
+        // Always clear preserve class unless explicitly enabled
+        removeClassFromHTML(invertPreserveClass);
+
         if (!invertOptions.invert) {
             setStyleProperty("documentInvert", documentInvert.off);
+            return;
+        }
+
+        // Preserve Colors only makes sense in dark mode
+        if (
+            this.extensionData.mode === ExtensionMode.Dark &&
+            invertOptions.preserve_colors
+        ) {
+            addClassToHTML(invertPreserveClass);
+            setStyleProperty("documentInvert", documentInvert.preserve_colors);
             return;
         }
 
@@ -549,6 +563,7 @@ class DocsAfterDark {
 
     private removeExtension() {
         removeClassFromHTML(enabledClass);
+        removeClassFromHTML(invertPreserveClass);
         removeElement("stylesheet");
         removeElement("button");
     }

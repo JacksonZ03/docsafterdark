@@ -462,6 +462,9 @@ class InvertComponent extends StateSubscriber {
     private blackCheckbox = document.querySelector(
         "#documentBlack"
     ) as HTMLInputElement;
+    private preserveColorsCheckbox = document.querySelector(
+        "#documentPreserveColors"
+    ) as HTMLInputElement;
 
     initialize(): void {
         this.invertedCheckbox.addEventListener("click", () => {
@@ -479,6 +482,7 @@ class InvertComponent extends StateSubscriber {
             this.state.setData({
                 invert: {
                     ...extensionData.invert,
+                    preserve_colors: false,
                     grayscale: this.grayscaleCheckbox.checked,
                 },
             });
@@ -492,7 +496,22 @@ class InvertComponent extends StateSubscriber {
                     // For sanity, also set grayscale to true in case user
                     // clicks black without first enabling grayscale
                     grayscale: true,
+                    preserve_colors: false,
                     black: this.blackCheckbox.checked,
+                },
+            });
+        });
+
+        this.preserveColorsCheckbox.addEventListener("click", () => {
+            const extensionData = this.state.getData();
+            const enabled = this.preserveColorsCheckbox.checked;
+            this.state.setData({
+                invert: {
+                    ...extensionData.invert,
+                    preserve_colors: enabled,
+                    // preserve colors doesn't make sense alongside grayscale/black
+                    grayscale: enabled ? false : extensionData.invert.grayscale,
+                    black: enabled ? false : extensionData.invert.black,
                 },
             });
         });
@@ -502,21 +521,38 @@ class InvertComponent extends StateSubscriber {
         this.invertedCheckbox.checked = newData.invert.invert;
         this.grayscaleCheckbox.checked = newData.invert.grayscale;
         this.blackCheckbox.checked = newData.invert.black;
+        this.preserveColorsCheckbox.checked = newData.invert.preserve_colors;
 
-        this.grayscaleCheckbox.disabled = !newData.invert.invert;
+        const invertAllowed =
+            newData.invert.invert && newData.mode === ExtensionMode.Dark;
+        this.preserveColorsCheckbox.disabled = !invertAllowed;
+        this.grayscaleCheckbox.disabled =
+            !invertAllowed || newData.invert.preserve_colors;
         this.blackCheckbox.disabled =
-            !newData.invert.invert || !newData.invert.grayscale;
+            !invertAllowed ||
+            newData.invert.preserve_colors ||
+            !newData.invert.grayscale;
 
-        if (newData.invert.invert) {
+        if (invertAllowed && !newData.invert.preserve_colors) {
             removeClassFromParent(this.grayscaleCheckbox, "disabled");
         } else {
             addClassToParent(this.grayscaleCheckbox, "disabled");
         }
 
-        if (!newData.invert.invert || !newData.invert.grayscale) {
+        if (
+            !invertAllowed ||
+            newData.invert.preserve_colors ||
+            !newData.invert.grayscale
+        ) {
             addClassToParent(this.blackCheckbox, "disabled");
         } else {
             removeClassFromParent(this.blackCheckbox, "disabled");
+        }
+
+        if (invertAllowed) {
+            removeClassFromParent(this.preserveColorsCheckbox, "disabled");
+        } else {
+            addClassToParent(this.preserveColorsCheckbox, "disabled");
         }
     }
 }

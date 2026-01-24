@@ -49,6 +49,7 @@ interface InvertOptions {
     invert: boolean;
     grayscale: boolean;
     black: boolean;
+    preserve_colors: boolean;
 }
 
 interface AccentColorOptions {

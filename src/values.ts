@@ -34,6 +34,7 @@ const themeClasses = {
 };
 
 const enabledClass = "enabled";
+const invertPreserveClass = "invertPreserve";
 
 // NOTE: revisions-sprite1 has been renamed with an underscore (_).
 
@@ -54,6 +55,7 @@ const documentInvert = {
     invert: "invert(1)",
     grayscale: "invert(1) contrast(79.5%) grayscale(100%)",
     black: "invert(1) grayscale(100%)",
+    preserve_colors: "invert(1) hue-rotate(180deg)",
     off: "none",
 };
 
@@ -82,6 +84,7 @@ const defaultExtensionData: ExtensionData = {
         invert: true,
         grayscale: true,
         black: false,
+        preserve_colors: false,
     },
 
     button_options: {
@@ -113,5 +116,6 @@ export {
     guideLink,
     themeClasses,
     enabledClass,
+    invertPreserveClass,
     defaultExtensionData,
 };
